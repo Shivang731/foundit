@@ -1,8 +1,9 @@
 import express from 'express'; import cors from 'cors'; import helmet from 'helmet'; import cookieParser from 'cookie-parser'; import rateLimit from 'express-rate-limit'; import jwt from 'jsonwebtoken'; import bcrypt from 'bcryptjs'; import mongoose from 'mongoose'; import { z } from 'zod';
 import { User, Item, Claim, Notification, ModerationReport } from './models.js';
 const app=express(); const prod=process.env.NODE_ENV==='production'; const cookieName='foundit_session';
-app.set('trust proxy',1); app.use(helmet()); app.use(cors({origin:(process.env.CLIENT_URL||'http://localhost:5173').split(',').map(x=>x.trim()),credentials:true})); app.use(express.json({limit:'1mb'})); app.use(cookieParser());
-app.use((req,res,next)=>{if(['POST','PATCH','PUT','DELETE'].includes(req.method)){const origin=req.get('origin'); if(origin && !(process.env.CLIENT_URL||'http://localhost:5173').split(',').map(x=>x.trim()).includes(origin))return res.status(403).json({error:'Request origin is not allowed.'});} next();});
+const allowedOrigins=new Set([...(process.env.CLIENT_URL||'http://localhost:5173').split(',').map(x=>x.trim()).filter(Boolean),'https://foundit-blond.vercel.app','https://foundit-daka16m29-shivang731s-projects.vercel.app']);
+app.set('trust proxy',1); app.use(helmet()); app.use(cors({origin:[...allowedOrigins],credentials:true})); app.use(express.json({limit:'1mb'})); app.use(cookieParser());
+app.use((req,res,next)=>{if(['POST','PATCH','PUT','DELETE'].includes(req.method)){const origin=req.get('origin'); if(origin&&!allowedOrigins.has(origin))return res.status(403).json({error:'Request origin is not allowed.'});} next();});
 const limiter=(windowMs,max)=>rateLimit({windowMs,max,standardHeaders:true,legacyHeaders:false,message:{error:'Too many requests. Please try again shortly.'}});
 app.get('/api/health',(req,res)=>{const connected=mongoose.connection.readyState===1;res.status(connected?200:503).json({ok:connected,database:connected?'connected':'disconnected'});});
 app.use('/api/auth',limiter(15*60*1000,30));
