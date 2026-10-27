@@ -1,6 +1,4 @@
-# FoundIt
 
-**Lost something? Let’s bring it home.** FoundIt is a campus lost-and-found platform for reporting missing and found belongings, discovering relevant reports, submitting private claims, and coordinating verified returns.
 
 ## Problem and goals
 
