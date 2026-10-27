@@ -2,8 +2,7 @@ services:
   - type: web
     name: foundit-api
     runtime: node
-    rootDir: foundit
-    buildCommand: npm install
+    buildCommand: npm ci
     startCommand: npm run start -w server
     healthCheckPath: /api/health
     envVars:
